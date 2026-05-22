@@ -3,9 +3,16 @@ Feature: RC-003 Reject Request Change
 
   Background:
     * url changeManagementUrl
-    * def uniqueId = Math.floor(Math.random() * 900000) + 100000
 
-    # Create a fresh PENDING request change before each scenario
+    # Cancel any PENDING authorizer-setting requests so requestObjectId=1 can be reused
+    Given path '/api/v1/request-change/report/for/admins'
+    And params { subject: 'authorizer-setting', action: 'update', statusId: 1, size: 100 }
+    When method GET
+    Then status 200
+    * def pendingIds = response.data.content.map(function(x){ return x.id })
+    * karate.forEach(pendingIds, function(id){ karate.call('classpath:change-management/helper-cancel.feature', { cancelId: id }) })
+
+    # Create a fresh PENDING request change with the static authorizer-setting row
     Given path '/api/v1/resource/request-change'
     And header X-User-Id = userId
     And header X-Participant-Id = participantId
@@ -16,7 +23,7 @@ Feature: RC-003 Reject Request Change
         "subject": "authorizer-setting",
         "action": "update",
         "callbackServiceName": "",
-        "requestObjectId": #(uniqueId)
+        "requestObjectId": 1
       }
       """
     When method POST
