@@ -72,7 +72,9 @@ Feature: NT-003 Update Notification Template
 
   @smoke
   Scenario: Update with variables and matching placeholder — reflected after approval
-    * def testBody = 'Dear ${employee_name}, your request has been processed.'
+    # Use the first variable already associated with this template (real DB data)
+    * def testVar  = original.variables[0]
+    * def testBody = 'Dear ' + testVar.label + ', your request has been processed.'
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request
@@ -80,7 +82,7 @@ Feature: NT-003 Update Notification Template
       {
         "body": "#(testBody)",
         "statusId": 1,
-        "variables": [{ "id": 1 }]
+        "variables": [{ "id": #(testVar.id) }]
       }
       """
     When method PUT
@@ -157,17 +159,11 @@ Feature: NT-003 Update Notification Template
 
   @negative
   Scenario: Placeholder in body but no variable declared - returns 422
-    * def testBody = 'Dear ${employee_name}, your password has been reset.'
+    * def testVar  = original.variables[0]
+    * def testBody = 'Dear ' + testVar.label + ', your password has been reset.'
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request
-      """
-      {
-        "body": "#(testBody)",
-        "statusId": 1,
-        "variables": []
-      }
-      """
+    And request ({ body: testBody, statusId: 1, variables: [] })
     When method PUT
     Then status 422
     And match response.error contains 'Placeholder mismatch'
@@ -175,9 +171,10 @@ Feature: NT-003 Update Notification Template
 
   @negative
   Scenario: Variable declared but placeholder missing from body - returns 422
+    * def testVar = original.variables[0]
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "No placeholder here.", "statusId": 1, "variables": [{ "id": 1 }] }
+    And request ({ body: 'No placeholder here.', statusId: 1, variables: [{ id: testVar.id }] })
     When method PUT
     Then status 422
     And match response.error contains 'Placeholder mismatch'
