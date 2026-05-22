@@ -11,7 +11,7 @@ Feature: RC-001 Create Request Change
         "requestObject": { "numAuthorizer": 1 },
         "subject": "authorizer-setting",
         "action": "update",
-        "callbackServiceName": "change-management",
+        "callbackServiceName": "",
         "requestObjectId": #(uniqueId),
         "requesterRemark": "Updating authorizer count"
       }

@@ -15,7 +15,7 @@ Feature: RC-002 Approve Request Change
         "requestObject": { "numAuthorizer": 1 },
         "subject": "authorizer-setting",
         "action": "update",
-        "callbackServiceName": "change-management",
+        "callbackServiceName": "",
         "requestObjectId": #(uniqueId)
       }
       """
