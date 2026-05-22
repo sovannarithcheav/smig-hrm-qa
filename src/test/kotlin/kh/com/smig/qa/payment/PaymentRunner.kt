@@ -1,6 +1,7 @@
-package kh.com.smig.qa
+package kh.com.smig.qa.payment
 
 import com.intuit.karate.junit5.Karate
+import kh.com.smig.qa.ServiceStarter
 import org.junit.jupiter.api.BeforeAll
 
 class PaymentRunner {
