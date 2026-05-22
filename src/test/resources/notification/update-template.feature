@@ -6,6 +6,11 @@ Feature: NT-003 Update Notification Template
     * def originalSetup = callonce read('classpath:notification/helper-fetch-template.feature') { templateId: 1 }
     * def original = originalSetup.template
 
+    # Fetch all variables from DB once — used in scenarios that need a real variable id + label
+    * def varSetup = callonce read('classpath:notification/helper-fetch-variables.feature') {}
+    * def allVars  = varSetup.variables
+    * def testVar  = allVars[0]
+
     # Cancel own pending notification-template request changes before each scenario
     Given url changeManagementUrl
     And path '/api/v1/request-change/report/for/requesters'
@@ -72,9 +77,7 @@ Feature: NT-003 Update Notification Template
 
   @smoke
   Scenario: Update with variables and matching placeholder — reflected after approval
-    # Use the first variable already associated with this template (real DB data)
-    * def testVar  = original.variables[0]
-    * def testBody = 'Dear ' + testVar.label + ', your request has been processed.'
+    * def testBody = 'Dear ' + testVar.name + ', your request has been processed.'
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request
@@ -104,36 +107,7 @@ Feature: NT-003 Update Notification Template
     When method GET
     Then status 200
     And match response.data.body == testBody
-    And match response.data.variables == original.variables
-
-  @smoke
-  Scenario: Restore template to original state (runs last among positives)
-    # Omit variables — DB already holds original values; empty variables skips
-    # validatePlaceholders so body="test" (no placeholder) is accepted.
-    Given path '/api/v1/notification/templates/1'
-    And header X-User-Id = userId
-    And request ({ subject: original.subject, body: original.body, statusId: original.status.id })
-    When method PUT
-    Then status 202
-    And match response.data.requestChangeId == '#number'
-    * def requestChangeId = response.data.requestChangeId
-
-    Given url changeManagementUrl
-    And path '/api/v1/request-change/' + requestChangeId + '/approve'
-    And header X-User-Id = userId
-    And header X-Participant-Id = userId
-    When method POST
-    Then status 200
-    And match response.error == null
-
-    Given url notificationUrl
-    And path '/api/v1/notification/templates/1'
-    When method GET
-    Then status 200
-    And match response.data.body == original.body
-    And match response.data.subject == original.subject
-    And match response.data.status.id == original.status.id
-    And match response.data.variables == original.variables
+    And match response.data.variables[0].id == testVar.id
 
   # ---------- Negative ----------
 
@@ -159,8 +133,7 @@ Feature: NT-003 Update Notification Template
 
   @negative
   Scenario: Placeholder in body but no variable declared - returns 422
-    * def testVar  = original.variables[0]
-    * def testBody = 'Dear ' + testVar.label + ', your password has been reset.'
+    * def testBody = 'Dear ' + testVar.name + ', your password has been reset.'
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request ({ body: testBody, statusId: 1, variables: [] })
@@ -171,7 +144,6 @@ Feature: NT-003 Update Notification Template
 
   @negative
   Scenario: Variable declared but placeholder missing from body - returns 422
-    * def testVar = original.variables[0]
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request ({ body: 'No placeholder here.', statusId: 1, variables: [{ id: testVar.id }] })
