@@ -5,32 +5,18 @@ Feature: RC-003 Reject Request Change
     * url changeManagementUrl
     * def testRemark = karate.scenario.name
 
-    # Cancel any PENDING authorizer-setting requests so requestObjectId=1 can be reused
+    # Reuse any existing PENDING request — prefer requestObjectId=1 (smoke needs it for callback),
+    # accept any other requestObjectId (fine for all negative scenarios).
+    # Create a new one only when nothing is pending at all.
     Given path '/api/v1/request-change/report/for/admins'
     And params { subject: 'authorizer-setting', action: 'update', statusId: 1, size: 100 }
     When method GET
     Then status 200
-    * def pendingIds = response.data.content.map(function(x){ return x.id })
-    * karate.forEach(pendingIds, function(id){ karate.call('classpath:change-management/helper-cancel.feature', { cancelId: id }) })
-
-    # Create a fresh PENDING request change with the static authorizer-setting row
-    Given path '/api/v1/resource/request-change'
-    And header X-User-Id = userId
-    And header X-Participant-Id = participantId
-    And request
-      """
-      {
-        "requestObject": { "numAuthorizer": 1 },
-        "subject": "authorizer-setting",
-        "action": "update",
-        "callbackServiceName": "",
-        "requestObjectId": 1,
-        "requesterRemark": "#(testRemark)"
-      }
-      """
-    When method POST
-    Then status 201
-    * def pendingId = response.data.id
+    * def allPending  = response.data.content
+    * def preferred   = allPending.filter(function(x){ return x.requestObjectId == 1 })
+    * def pendingId   = preferred.length > 0 ? preferred[0].id : (allPending.length > 0 ? allPending[0].id : null)
+    * def created     = pendingId == null ? karate.call('classpath:change-management/helper-create.feature', { testRemark: testRemark }) : null
+    * def pendingId   = pendingId != null ? pendingId : created.pendingId
 
   # ---------- Positive ----------
 
