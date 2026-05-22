@@ -26,29 +26,26 @@ Feature: RC-003 Reject Request Change
   # ---------- Positive ----------
 
   @smoke
-  Scenario: Reject PENDING request — validation passes, callback attempted, record stays intact
-    # In dev the callback service health check fails → UNHEALTHY.
-    # This proves: routing works, headers accepted, body parsed, validateRequestChange passed.
-    # The DB write (reject) never runs because healthCheck throws first.
+  Scenario: Reject PENDING request — rejection recorded, state transitions to REJECTED
     Given path '/api/v1/request-change/' + pendingId + '/reject'
     And header X-User-Id = userId
     And header X-Participant-Id = participantId
     And request { "authorizerRemark": "Rejected for testing" }
     When method POST
-    Then status 400
-    And match response.error == 'UNHEALTHY'
-    And match response.data == null
+    Then status 200
+    And match response.error == null
+    And match response.data == {}
 
-    # Confirm record is not corrupted — still PENDING with correct subject/action
+    # Verify the rejection was recorded
     Given path '/api/v1/request-change/report/' + pendingId + '/detail'
     When method GET
     Then status 200
     And match response.error == null
     And match response.data.subject == 'authorizer-setting'
     And match response.data.action == 'update'
-    And match response.data.statusName == 'pending'
-    And match response.data.numResponse == 0
-    And match response.data.approvals == '#[0]'
+    And match response.data.statusName == 'rejected'
+    And match response.data.numResponse == 1
+    And match response.data.approvals[0].authorizeStatusName == 'rejected'
 
   @smoke
   Scenario: Reject PENDING request without remark - body is optional
@@ -57,9 +54,9 @@ Feature: RC-003 Reject Request Change
     And header X-Participant-Id = participantId
     And request {}
     When method POST
-    Then status 400
-    And match response.error == 'UNHEALTHY'
-    And match response.data == null
+    Then status 200
+    And match response.error == null
+    And match response.data == {}
 
   # ---------- Negative ----------
 

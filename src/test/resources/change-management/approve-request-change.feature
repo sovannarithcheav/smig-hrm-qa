@@ -26,28 +26,25 @@ Feature: RC-002 Approve Request Change
   # ---------- Positive ----------
 
   @smoke
-  Scenario: Approve PENDING request — validation passes, callback attempted, record stays intact
-    # In dev the callback service health check fails → UNHEALTHY.
-    # This proves: routing works, headers accepted, validateRequestChange passed.
-    # The DB write (preExecution) never runs because healthCheck throws first.
+  Scenario: Approve PENDING request — approval recorded, state advances past PENDING
     Given path '/api/v1/request-change/' + pendingId + '/approve'
     And header X-User-Id = userId
     And header X-Participant-Id = participantId
     When method POST
-    Then status 400
-    And match response.error == 'UNHEALTHY'
-    And match response.data == null
+    Then status 200
+    And match response.error == null
+    And match response.data == {}
 
-    # Confirm record is not corrupted — still PENDING with correct subject/action
+    # Verify the approval was recorded and the state machine advanced
     Given path '/api/v1/request-change/report/' + pendingId + '/detail'
     When method GET
     Then status 200
     And match response.error == null
     And match response.data.subject == 'authorizer-setting'
     And match response.data.action == 'update'
-    And match response.data.statusName == 'pending'
-    And match response.data.numResponse == 0
-    And match response.data.approvals == '#[0]'
+    And match response.data.statusName != 'pending'
+    And match response.data.numResponse == 1
+    And match response.data.approvals[0].authorizeStatusName == 'approved'
 
   # ---------- Negative ----------
 
