@@ -42,7 +42,7 @@ class ChangeManagementRunner {
         }
 
         private fun isHealthy(): Boolean = try {
-            val conn = URL("http://localhost:8084/actuator/health").openConnection() as HttpURLConnection
+            val conn = URL("http://127.0.0.1:8084/actuator/health").openConnection() as HttpURLConnection
             conn.connectTimeout = 2_000
             conn.readTimeout = 2_000
             conn.responseCode == 200
