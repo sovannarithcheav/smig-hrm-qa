@@ -96,6 +96,7 @@ Feature: NT-003 Update Notification Template
     Then status 200
     And match response.data.body == original.body
     And match response.data.subject == original.subject
+    And match response.data.status.id == original.status.id
 
   # ---------- Negative ----------
 
