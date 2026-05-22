@@ -12,7 +12,6 @@ Feature: Create a PENDING authorizer-setting request change
         "requestObject": { "numAuthorizer": 1 },
         "subject": "authorizer-setting",
         "action": "update",
-        "callbackServiceName": "",
         "requestObjectId": 1,
         "requesterRemark": "#(testRemark)"
       }

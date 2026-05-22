@@ -12,7 +12,6 @@ Feature: Create one shared PENDING request for the test suite
         "requestObject": { "numAuthorizer": 1 },
         "subject": "authorizer-setting",
         "action": "update",
-        "callbackServiceName": "",
         "requestObjectId": 1,
         "requesterRemark": "test suite shared pending"
       }

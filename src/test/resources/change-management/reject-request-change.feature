@@ -25,7 +25,6 @@ Feature: RC-003 Reject Request Change
         "requestObject": { "numAuthorizer": 1 },
         "subject": "authorizer-setting",
         "action": "update",
-        "callbackServiceName": "",
         "requestObjectId": 1,
         "requesterRemark": "#(testRemark)"
       }
