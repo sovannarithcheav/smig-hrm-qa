@@ -3,6 +3,7 @@ Feature: RC-003 Reject Request Change
 
   Background:
     * url changeManagementUrl
+    * def testRemark = karate.scenario.name
 
     # Cancel any PENDING authorizer-setting requests so requestObjectId=1 can be reused
     Given path '/api/v1/request-change/report/for/admins'
@@ -24,7 +25,7 @@ Feature: RC-003 Reject Request Change
         "action": "update",
         "callbackServiceName": "",
         "requestObjectId": 1,
-        "requesterRemark": "Testing reject flow"
+        "requesterRemark": "#(testRemark)"
       }
       """
     When method POST

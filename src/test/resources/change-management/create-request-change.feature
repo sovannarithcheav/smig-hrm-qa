@@ -5,6 +5,7 @@ Feature: RC-001 Create Request Change
     * url changeManagementUrl
     # unique requestObjectId per run to avoid ONGOING_REQUESTS conflict
     * def uniqueId = Math.floor(Math.random() * 900000) + 100000
+    * def testRemark = karate.scenario.name
     * def validBody =
       """
       {
@@ -13,7 +14,7 @@ Feature: RC-001 Create Request Change
         "action": "update",
         "callbackServiceName": "",
         "requestObjectId": #(uniqueId),
-        "requesterRemark": "Updating authorizer count"
+        "requesterRemark": "#(testRemark)"
       }
       """
 
