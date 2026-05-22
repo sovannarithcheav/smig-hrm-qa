@@ -105,6 +105,39 @@ Feature: NT-003 Update Notification Template
     And match response.data.variables == original.variables
 
   @smoke
+  Scenario: Placeholder in body with no declared variables — accepted (validation skipped)
+    * def testBody = 'Dear ${employee_name}, your password has been reset.'
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request
+      """
+      {
+        "body": "#(testBody)",
+        "statusId": 1,
+        "variables": []
+      }
+      """
+    When method PUT
+    Then status 202
+    And match response.error == null
+    And match response.data.requestChangeId == '#number'
+    * def requestChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + requestChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+    And match response.error == null
+
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == testBody
+
+  @smoke
   Scenario: Restore template to original state (runs last among positives)
     # Omit variables — DB already holds original values; empty variables skips
     # validatePlaceholders so body="test" (no placeholder) is accepted.
