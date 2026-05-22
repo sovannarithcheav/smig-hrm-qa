@@ -3,10 +3,11 @@ Feature: PAY-002 OT Records
 
   Background:
     * url paymentUrl
+    * def uniqueEmployeeId = Math.floor(Math.random() * 900000) + 100000
     * def validBody =
       """
       {
-        "employeeId": 1,
+        "employeeId": #(uniqueEmployeeId),
         "otType": "WEEKDAY",
         "clockIn": "2026-05-22T08:00:00",
         "clockOut": "2026-05-22T11:00:00",
