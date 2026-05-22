@@ -6,14 +6,31 @@ import java.net.URL
 
 object ServiceStarter {
 
-    fun ensureRunning(name: String, port: Int, projectDir: String) {
-        val healthUrl = "http://127.0.0.1:$port/actuator/health"
+    private data class ServiceDef(val port: Int, val projectDir: String)
+
+    private val registry = mapOf(
+        "change-management" to ServiceDef(8084, "smig-hrm-change-management"),
+        "payment"           to ServiceDef(8085, "smig-hrm-payment-service"),
+        "notification"      to ServiceDef(8088, "smig-hrm-notification"),
+    )
+
+    /** Start all listed services in parallel, waiting for every one to be UP. */
+    fun ensureRunning(vararg names: String) {
+        val threads = names.map { name ->
+            val def = registry[name] ?: error("[QA] Unknown service '$name' — add it to ServiceStarter.registry")
+            Thread({ startIfNeeded(name, def) }, "qa-start-$name").also { it.start() }
+        }
+        threads.forEach { it.join() }
+    }
+
+    private fun startIfNeeded(name: String, def: ServiceDef) {
+        val healthUrl = "http://127.0.0.1:${def.port}/actuator/health"
         if (isHealthy(healthUrl)) {
-            println("[QA] $name already UP at 127.0.0.1:$port")
+            println("[QA] $name already UP at 127.0.0.1:${def.port}")
             return
         }
         println("[QA] $name not running — starting...")
-        val dir = File(System.getProperty("user.dir")).resolveSibling(projectDir)
+        val dir = File(System.getProperty("user.dir")).resolveSibling(def.projectDir)
         val process = ProcessBuilder("./gradlew", "run", "-Pdevelopment")
             .directory(dir)
             .redirectErrorStream(true)

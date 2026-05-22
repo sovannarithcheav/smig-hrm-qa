@@ -8,10 +8,11 @@ class ChangeManagementRunner {
     companion object {
         @JvmStatic
         @BeforeAll
+        // change-management calls back to notification and payment as configured callback services
         fun setup() = ServiceStarter.ensureRunning(
-            name       = "change-management",
-            port       = 8084,
-            projectDir = "smig-hrm-change-management",
+            "change-management",
+            "notification",
+            "payment",
         )
     }
 

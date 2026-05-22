@@ -8,11 +8,7 @@ class NotificationRunner {
     companion object {
         @JvmStatic
         @BeforeAll
-        fun setup() = ServiceStarter.ensureRunning(
-            name       = "notification",
-            port       = 8088,
-            projectDir = "smig-hrm-notification",
-        )
+        fun setup() = ServiceStarter.ensureRunning("notification")
     }
 
     @Karate.Test

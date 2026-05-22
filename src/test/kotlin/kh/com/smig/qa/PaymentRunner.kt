@@ -8,10 +8,10 @@ class PaymentRunner {
     companion object {
         @JvmStatic
         @BeforeAll
+        // payment calls change-management to create request changes for OT records
         fun setup() = ServiceStarter.ensureRunning(
-            name       = "payment",
-            port       = 8085,
-            projectDir = "smig-hrm-payment-service",
+            "payment",
+            "change-management",
         )
     }
 
