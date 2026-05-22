@@ -23,7 +23,8 @@ Feature: RC-003 Reject Request Change
         "subject": "authorizer-setting",
         "action": "update",
         "callbackServiceName": "",
-        "requestObjectId": 1
+        "requestObjectId": 1,
+        "requesterRemark": "Testing reject flow"
       }
       """
     When method POST

@@ -23,7 +23,8 @@ Feature: RC-002 Approve Request Change
         "subject": "authorizer-setting",
         "action": "update",
         "callbackServiceName": "",
-        "requestObjectId": 1
+        "requestObjectId": 1,
+        "requesterRemark": "Testing approve flow"
       }
       """
     When method POST
