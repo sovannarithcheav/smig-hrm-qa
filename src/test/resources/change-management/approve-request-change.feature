@@ -5,18 +5,34 @@ Feature: RC-002 Approve Request Change
     * url changeManagementUrl
     * def testRemark = karate.scenario.name
 
-    # Reuse any existing PENDING request — prefer requestObjectId=1 (smoke needs it for callback),
-    # accept any other requestObjectId (fine for all negative scenarios).
-    # Create a new one only when nothing is pending at all.
-    Given path '/api/v1/request-change/report/for/admins'
+    # Cancel only OUR OWN pending requests (filtered by requestedBy = userId) so we never
+    # touch records belonging to other users in a shared environment.
+    Given path '/api/v1/request-change/report/for/requesters'
+    And header X-User-Id = userId
     And params { subject: 'authorizer-setting', action: 'update', statusId: 1, size: 100 }
     When method GET
     Then status 200
-    * def allPending  = response.data.content
-    * def preferred   = allPending.filter(function(x){ return x.requestObjectId == 1 })
-    * def pendingId   = preferred.length > 0 ? preferred[0].id : (allPending.length > 0 ? allPending[0].id : null)
-    * def created     = pendingId == null ? karate.call('classpath:change-management/helper-create.feature', { testRemark: testRemark }) : null
-    * def pendingId   = pendingId != null ? pendingId : created.pendingId
+    * def myPendingIds = response.data.content.map(function(x){ return x.id })
+    * karate.forEach(myPendingIds, function(id){ karate.call('classpath:change-management/helper-cancel.feature', { cancelId: id }) })
+
+    # Always create a fresh PENDING request for this scenario
+    Given path '/api/v1/resource/request-change'
+    And header X-User-Id = userId
+    And header X-Participant-Id = participantId
+    And request
+      """
+      {
+        "requestObject": { "numAuthorizer": 1 },
+        "subject": "authorizer-setting",
+        "action": "update",
+        "callbackServiceName": "",
+        "requestObjectId": 1,
+        "requesterRemark": "#(testRemark)"
+      }
+      """
+    When method POST
+    Then status 201
+    * def pendingId = response.data.id
 
   # ---------- Positive ----------
 
