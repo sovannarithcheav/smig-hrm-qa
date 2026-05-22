@@ -3,7 +3,7 @@ function fn() {
 
     var config = {
         env: env,
-        changeManagementUrl: 'http://localhost:8083',
+        changeManagementUrl: 'http://localhost:8084',
         notificationUrl:     'http://localhost:8088',
         paymentUrl:          'http://localhost:8085',
         userId:              '1',

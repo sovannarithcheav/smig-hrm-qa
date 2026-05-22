@@ -5,5 +5,5 @@ import com.intuit.karate.junit5.Karate
 class ChangeManagementRunner {
 
     @Karate.Test
-    fun all(): Karate = Karate.run("change-management").relativeTo(javaClass)
+    fun all(): Karate = Karate.run("classpath:change-management")
 }

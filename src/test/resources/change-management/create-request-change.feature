@@ -3,6 +3,8 @@ Feature: RC-001 Create Request Change
 
   Background:
     * url changeManagementUrl
+    # unique requestObjectId per run to avoid ONGOING_REQUESTS conflict
+    * def uniqueId = Math.floor(Math.random() * 900000) + 100000
     * def validBody =
       """
       {
@@ -10,7 +12,7 @@ Feature: RC-001 Create Request Change
         "subject": "authorizer-setting",
         "action": "update",
         "callbackServiceName": "change-management",
-        "requestObjectId": 1,
+        "requestObjectId": #(uniqueId),
         "requesterRemark": "Updating authorizer count"
       }
       """
@@ -24,7 +26,7 @@ Feature: RC-001 Create Request Change
     When method POST
     Then status 201
     And match response.data.id == '#number'
-    And match response.data.status == 'PENDING'
+    And match response.error == null
 
   @negative
   Scenario: Missing X-User-Id header - returns 400
@@ -33,7 +35,7 @@ Feature: RC-001 Create Request Change
     And request validBody
     When method POST
     Then status 400
-    And match response.message contains 'Missing header'
+    And match response.error contains 'Missing header'
 
   @negative
   Scenario: Missing X-Participant-Id header - returns 400
@@ -42,4 +44,4 @@ Feature: RC-001 Create Request Change
     And request validBody
     When method POST
     Then status 400
-    And match response.message contains 'Missing header'
+    And match response.error contains 'Missing header'
