@@ -2,7 +2,11 @@
 Feature: NT-003 Update Notification Template
 
   Background:
-    # Cancel own pending notification-template request changes so each scenario starts clean
+    # Capture original template state once before any scenario modifies it
+    * def originalSetup = callonce read('classpath:notification/helper-fetch-template.feature') { templateId: 1 }
+    * def original = originalSetup.template
+
+    # Cancel own pending notification-template request changes before each scenario
     Given url changeManagementUrl
     And path '/api/v1/request-change/report/for/requesters'
     And header X-User-Id = userId
@@ -16,24 +20,82 @@ Feature: NT-003 Update Notification Template
   # ---------- Positive ----------
 
   @smoke
-  Scenario: Happy path - returns 202 with requestChangeId
+  Scenario: Update body only — change is reflected in template after approval
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "Hello, this is a test template body.", "statusId": 1 }
+    And request { "body": "Updated body for testing.", "statusId": 1 }
     When method PUT
     Then status 202
     And match response.error == null
     And match response.data.requestChangeId == '#number'
+    * def requestChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + requestChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+    And match response.error == null
+
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == 'Updated body for testing.'
 
   @smoke
-  Scenario: Update with optional subject and variables - returns 202
+  Scenario: Update with subject — change is reflected in template after approval
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "subject": "Test Subject", "body": "Hello, this is a test.", "statusId": 1, "variables": [] }
+    And request { "subject": "Test Subject", "body": "Updated with subject.", "statusId": 1, "variables": [] }
     When method PUT
     Then status 202
     And match response.error == null
     And match response.data.requestChangeId == '#number'
+    * def requestChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + requestChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+    And match response.error == null
+
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == 'Updated with subject.'
+    And match response.data.subject == 'Test Subject'
+
+  @smoke
+  Scenario: Restore template to original state (runs last among positives)
+    # Omit variables — they were never modified (empty variables skips validatePlaceholders),
+    # so the existing variable assignments in DB remain intact.
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request ({ subject: original.subject, body: original.body, statusId: original.status.id })
+    When method PUT
+    Then status 202
+    And match response.data.requestChangeId == '#number'
+    * def requestChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + requestChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+    And match response.error == null
+
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == original.body
+    And match response.data.subject == original.subject
 
   # ---------- Negative ----------
 
