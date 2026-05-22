@@ -97,6 +97,7 @@ Feature: NT-003 Update Notification Template
     And match response.data.body == original.body
     And match response.data.subject == original.subject
     And match response.data.status.id == original.status.id
+    And match response.data.variables == original.variables
 
   # ---------- Negative ----------
 
