@@ -71,9 +71,43 @@ Feature: NT-003 Update Notification Template
     And match response.data.subject == 'Test Subject'
 
   @smoke
+  Scenario: Update with variables and matching placeholder — reflected after approval
+    * def testBody = 'Dear ${employee_name}, your request has been processed.'
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request
+      """
+      {
+        "body": "#(testBody)",
+        "statusId": 1,
+        "variables": [{ "id": 1 }]
+      }
+      """
+    When method PUT
+    Then status 202
+    And match response.error == null
+    And match response.data.requestChangeId == '#number'
+    * def requestChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + requestChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+    And match response.error == null
+
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == testBody
+    And match response.data.variables == original.variables
+
+  @smoke
   Scenario: Restore template to original state (runs last among positives)
-    # Omit variables — they were never modified (empty variables skips validatePlaceholders),
-    # so the existing variable assignments in DB remain intact.
+    # Omit variables — DB already holds original values; empty variables skips
+    # validatePlaceholders so body="test" (no placeholder) is accepted.
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request ({ subject: original.subject, body: original.body, statusId: original.status.id })
@@ -119,4 +153,14 @@ Feature: NT-003 Update Notification Template
     When method PUT
     Then status 404
     And match response.error != null
+    And match response.data == null
+
+  @negative
+  Scenario: Variable declared but placeholder missing from body - returns 422
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request { "body": "No placeholder here.", "statusId": 1, "variables": [{ "id": 1 }] }
+    When method PUT
+    Then status 422
+    And match response.error contains 'Placeholder mismatch'
     And match response.data == null
