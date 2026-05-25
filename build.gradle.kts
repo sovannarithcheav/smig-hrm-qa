@@ -18,6 +18,15 @@ kotlin {
     jvmToolchain(21)
 }
 
+val printKarateReport by tasks.registering {
+    doLast {
+        val report = file("build/karate-reports/karate-summary.html")
+        if (report.exists()) {
+            println("\n  Karate report: ${report.toURI()}\n")
+        }
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
     // pass -Dkarate.env=staging to switch environment
@@ -29,4 +38,6 @@ tasks.test {
     testLogging {
         events("passed", "skipped", "failed")
     }
+
+    finalizedBy(printKarateReport)
 }

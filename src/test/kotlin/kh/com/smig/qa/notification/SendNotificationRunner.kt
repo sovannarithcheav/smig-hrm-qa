@@ -13,5 +13,8 @@ class SendNotificationRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/e2e-send-notification.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:notification/send/positive/send.feature",
+        "classpath:notification/send/negative/send.feature",
+    )
 }

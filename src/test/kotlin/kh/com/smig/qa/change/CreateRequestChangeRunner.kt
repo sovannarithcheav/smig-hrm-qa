@@ -13,5 +13,8 @@ class CreateRequestChangeRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:change-management/create-request-change.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:change-management/request-change/positive/create.feature",
+        "classpath:change-management/request-change/negative/create.feature",
+    )
 }

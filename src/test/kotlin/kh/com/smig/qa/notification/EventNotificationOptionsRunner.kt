@@ -13,5 +13,5 @@ class EventNotificationOptionsRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/event-notification-options.feature")
+    fun run(): Karate = Karate.run("classpath:notification/event-options/positive/options.feature")
 }

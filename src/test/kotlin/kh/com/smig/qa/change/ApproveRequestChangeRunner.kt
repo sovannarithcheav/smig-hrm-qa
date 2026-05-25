@@ -13,5 +13,8 @@ class ApproveRequestChangeRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:change-management/approve-request-change.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:change-management/request-change/positive/approve.feature",
+        "classpath:change-management/request-change/negative/approve.feature",
+    )
 }

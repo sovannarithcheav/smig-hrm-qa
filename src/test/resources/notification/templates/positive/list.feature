@@ -92,13 +92,3 @@ Feature: NT-001 List Notification Templates
     * def page1Ids = response.data.content.map(function(x){ return x.id })
     * def overlap = page0Ids.filter(function(id){ return page1Ids.indexOf(id) >= 0 })
     * assert overlap.length == 0
-
-  @negative
-  Scenario: No matching eventId - returns empty content with total 0
-    Given path '/api/v1/notification/templates'
-    And param eventId = 999999
-    When method GET
-    Then status 200
-    And match response.error == null
-    And match response.data.content == '#[0]'
-    And match response.data.total == 0

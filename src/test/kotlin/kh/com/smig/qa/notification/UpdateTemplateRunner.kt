@@ -13,5 +13,8 @@ class UpdateTemplateRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/update-template.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:notification/templates/positive/update.feature",
+        "classpath:notification/templates/negative/update.feature",
+    )
 }

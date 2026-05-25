@@ -13,5 +13,8 @@ class VariablesRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/variables.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:notification/variables/positive/variables.feature",
+        "classpath:notification/variables/negative/variables.feature",
+    )
 }

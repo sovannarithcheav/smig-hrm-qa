@@ -13,5 +13,8 @@ class ListTemplatesRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/list-templates.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:notification/templates/positive/list.feature",
+        "classpath:notification/templates/negative/list.feature",
+    )
 }

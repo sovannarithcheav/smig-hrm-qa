@@ -4,7 +4,7 @@ import com.intuit.karate.junit5.Karate
 import kh.com.smig.qa.ServiceStarter
 import org.junit.jupiter.api.BeforeAll
 
-class ExchangeRateRunner {
+class ExchangeRateCreateRunner {
 
     companion object {
         @JvmStatic
@@ -16,5 +16,8 @@ class ExchangeRateRunner {
     }
 
     @Karate.Test
-    fun all(): Karate = Karate.run("classpath:payment/exchange_rate")
+    fun run(): Karate = Karate.run(
+        "classpath:payment/exchange_rate/positive/create.feature",
+        "classpath:payment/exchange_rate/negative/create.feature",
+    )
 }

@@ -13,5 +13,8 @@ class TemplateDetailRunner {
     }
 
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:notification/template-detail.feature")
+    fun run(): Karate = Karate.run(
+        "classpath:notification/templates/positive/detail.feature",
+        "classpath:notification/templates/negative/detail.feature",
+    )
 }

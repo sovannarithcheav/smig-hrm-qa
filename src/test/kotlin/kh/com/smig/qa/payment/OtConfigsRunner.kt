@@ -4,17 +4,14 @@ import com.intuit.karate.junit5.Karate
 import kh.com.smig.qa.ServiceStarter
 import org.junit.jupiter.api.BeforeAll
 
-class ExchangeRateRunner {
+class OtConfigsRunner {
 
     companion object {
         @JvmStatic
         @BeforeAll
-        fun setup() = ServiceStarter.ensureRunning(
-            "payment",
-            "change-management",
-        )
+        fun setup() = ServiceStarter.ensureRunning("payment")
     }
 
     @Karate.Test
-    fun all(): Karate = Karate.run("classpath:payment/exchange_rate")
+    fun run(): Karate = Karate.run("classpath:payment/ot-configs")
 }
