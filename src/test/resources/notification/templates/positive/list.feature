@@ -18,7 +18,7 @@ Feature: NT-001 List Notification Templates
     * assert response.data.total >= response.data.content.length
 
     # Assert every item in the list has the correct shape
-    * def itemSchema = { id: '#number', name: '#string', body: '#string', subject: '##string', updatedAt: '##string', event: { id: '#number', code: '#string', name: '#string' }, channel: { id: '#number', name: '#string' }, status: { id: '#number', name: '#string' }, variables: '#array' }
+    * def itemSchema = { id: '#number', name: '#string', body: '#string', subject: '##string', updatedAt: '##string', updatedBy: '##number', event: { id: '#number', code: '#string', name: '#string' }, channel: { id: '#number', name: '#string' }, status: { id: '#number', name: '#string' }, variables: '#array' }
     * match each response.data.content == itemSchema
 
     # Assert every variable inside every item has id and label
