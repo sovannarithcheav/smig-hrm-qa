@@ -109,12 +109,12 @@ Every feature file carries three layers of tags:
 | Polarity | `@positive` `@negative` | Happy-path vs error/validation |
 | Special | `@smoke` `@e2e` `@create` | Cross-cutting: smoke suite, multi-service flow, create operation |
 
-Use `--tags` with `and` / `or` / `not` to slice any way you need:
+Use `--tags` to slice any way you need. Karate parses `karate.options` by whitespace, so multi-tag AND expressions must use commas (no spaces). `not` prefix negates a tag.
 
 ```bash
-# All positive exchange rate tests
+# All positive exchange rate tests (comma = AND)
 ./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
-  -Dkarate.options="--tags @exchange_rate and @positive"
+  -Dkarate.options="--tags @exchange_rate,@positive"
 
 # All negative tests in the payment suite
 ./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
@@ -122,7 +122,7 @@ Use `--tags` with `and` / `or` / `not` to slice any way you need:
 
 # All negative notification template tests
 ./gradlew test --tests "kh.com.smig.qa.notification.NotificationRunner" \
-  -Dkarate.options="--tags @templates and @negative"
+  -Dkarate.options="--tags @templates,@negative"
 
 # E2E tests only
 ./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
