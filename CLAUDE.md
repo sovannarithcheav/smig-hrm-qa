@@ -96,12 +96,43 @@ src/test/resources/
 
 ### Tags
 
-| Tag | Meaning |
-|---|---|
-| `@smoke` | Core happy-path, should always pass |
-| `@negative` | Error/validation paths |
-| `@e2e` | Multi-service flows (e.g. create → CS approve → verify) |
-| `@create` / `@payment` / etc. | Domain/operation scoping for filtered runner runs |
+Every feature file carries three layers of tags:
+
+```
+@<domain> @<resource> @<polarity>   [optional: @smoke @e2e @create ...]
+```
+
+| Layer | Values | Meaning |
+|---|---|---|
+| Domain | `@payment` `@notification` `@change-management` | Which service |
+| Resource | `@exchange_rate` `@ot_configs` `@ot_records` `@templates` `@variables` `@send` `@event_options` `@request_change` | Which resource |
+| Polarity | `@positive` `@negative` | Happy-path vs error/validation |
+| Special | `@smoke` `@e2e` `@create` | Cross-cutting: smoke suite, multi-service flow, create operation |
+
+Use `--tags` with `and` / `or` / `not` to slice any way you need:
+
+```bash
+# All positive exchange rate tests
+./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
+  -Dkarate.options="--tags @exchange_rate and @positive"
+
+# All negative tests in the payment suite
+./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
+  -Dkarate.options="--tags @negative"
+
+# All negative notification template tests
+./gradlew test --tests "kh.com.smig.qa.notification.NotificationRunner" \
+  -Dkarate.options="--tags @templates and @negative"
+
+# E2E tests only
+./gradlew test --tests "kh.com.smig.qa.payment.PaymentRunner" \
+  -Dkarate.options="--tags @e2e"
+
+# Smoke suite across all services
+./gradlew test -Dkarate.options="--tags @smoke"
+```
+
+Helper features are tagged `@ignore` and are never executed directly — only via `callonce` / `karate.call()` from other scenarios.
 
 ### karate-config.js
 
