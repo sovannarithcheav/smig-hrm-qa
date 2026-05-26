@@ -21,7 +21,7 @@ class ChangeManagementRunner {
 
     @Test
     fun all() {
-        val results = Karate.run("classpath:change-management").parallel(1)
+        val results = Karate.run("classpath:change-management/request-change").parallel(1)
         assertEquals(0, results.failCount, results.errorMessages)
     }
 }

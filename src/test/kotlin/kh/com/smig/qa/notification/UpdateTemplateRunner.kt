@@ -9,7 +9,7 @@ class UpdateTemplateRunner {
     companion object {
         @JvmStatic
         @BeforeAll
-        fun setup() = ServiceStarter.ensureRunning("change-management", "notification")
+        fun setup() = ServiceStarter.ensureRunning("change-management", "notification", "payment")
     }
 
     @Karate.Test
