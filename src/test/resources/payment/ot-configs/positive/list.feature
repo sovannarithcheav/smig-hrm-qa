@@ -1,4 +1,4 @@
-@payment
+@payment @ot_configs @positive
 Feature: PAY-001 List OT Configs
 
   Background:

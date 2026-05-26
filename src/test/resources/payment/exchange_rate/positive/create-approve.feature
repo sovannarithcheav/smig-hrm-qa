@@ -1,4 +1,4 @@
-@payment @e2e
+@payment @exchange_rate @positive @e2e
 Feature: PAY-003 Exchange Rate - E2E Create + CS Approval
 
   Background:

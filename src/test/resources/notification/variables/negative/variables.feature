@@ -1,4 +1,4 @@
-@notification
+@notification @variables @negative
 Feature: NT-005 Notification Variables - Negative
 
   Background:

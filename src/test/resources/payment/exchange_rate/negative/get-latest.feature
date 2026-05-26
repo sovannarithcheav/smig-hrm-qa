@@ -1,4 +1,4 @@
-@payment
+@payment @exchange_rate @negative
 Feature: PAY-003 Exchange Rate - Get Latest Negative
 
   Background:

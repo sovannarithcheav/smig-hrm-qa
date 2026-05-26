@@ -1,4 +1,4 @@
-@notification
+@notification @event_options @positive
 Feature: NT-004 Event Notification Options (Dropdown)
 
   Background:

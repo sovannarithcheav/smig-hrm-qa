@@ -1,4 +1,4 @@
-@payment @create
+@payment @exchange_rate @positive @create
 Feature: PAY-003 Exchange Rate - Create
 
   Background:

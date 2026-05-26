@@ -1,4 +1,4 @@
-@notification
+@notification @templates @negative
 Feature: NT-001 List Notification Templates - Negative
 
   Background:

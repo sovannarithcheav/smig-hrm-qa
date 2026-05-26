@@ -1,4 +1,4 @@
-@payment
+@payment @ot_records @negative
 Feature: PAY-002 OT Records - Negative
 
   Background:

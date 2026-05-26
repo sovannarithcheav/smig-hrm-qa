@@ -1,4 +1,4 @@
-@payment
+@payment @exchange_rate @positive
 Feature: PAY-003 Exchange Rate - List
 
   Background:

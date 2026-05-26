@@ -1,4 +1,4 @@
-@change-management
+@change-management @request_change @negative
 Feature: RC-003 Reject Request Change - Negative
 
   Background:

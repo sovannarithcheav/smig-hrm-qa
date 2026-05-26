@@ -1,4 +1,4 @@
-@change-management
+@change-management @request_change @positive
 Feature: RC-001 Create Request Change
 
   Background:

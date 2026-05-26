@@ -1,4 +1,4 @@
-@notification
+@notification @templates @positive
 Feature: NT-003 Update Notification Template
 
   Background:

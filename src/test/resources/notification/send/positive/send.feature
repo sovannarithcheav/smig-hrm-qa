@@ -1,4 +1,4 @@
-@notification
+@notification @send @positive
 Feature: NT-E2E Send Notification Flow
 
   # User id=10 (test@smig.com) is the only seeded user in the notification DB.

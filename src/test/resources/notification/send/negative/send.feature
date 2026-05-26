@@ -1,4 +1,4 @@
-@notification
+@notification @send @negative
 Feature: NT-E2E Send Notification Flow - Negative
 
   Background:

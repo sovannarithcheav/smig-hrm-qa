@@ -1,4 +1,4 @@
-@notification
+@notification @templates @negative
 Feature: NT-002 Notification Template Detail - Negative
 
   Background:
