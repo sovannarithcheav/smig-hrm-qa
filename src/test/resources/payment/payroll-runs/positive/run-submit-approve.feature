@@ -32,7 +32,7 @@ Feature: PAY-RUN-005 Payroll Run - Full Lifecycle (Run → Submit → Approve)
     * url changeManagementUrl
     Given path '/api/v1/request-change/' + requestChangeId + '/approve'
     And header X-User-Id = userId
-    And header X-Participant-Id = participantId
+    And header X-Participant-Id = userId
     When method POST
     Then status 200
 
