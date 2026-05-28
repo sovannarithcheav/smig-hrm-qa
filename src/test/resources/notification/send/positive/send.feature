@@ -42,8 +42,8 @@ Feature: NT-E2E Send Notification Flow
     When method GET
     Then status 200
     * def latest = response.data.content[0]
-    And match latest.subject == 'PWD_RESET_SUCC'
-    And match latest.title == pushTemplate.subject
+    And match latest.eventCode == 'PWD_RESET_SUCC'
+    And match latest.subject == pushTemplate.subject
     And match latest.content == pushTemplate.body
     And match latest.userId == targetUserId
     And match latest.id == '#number'
