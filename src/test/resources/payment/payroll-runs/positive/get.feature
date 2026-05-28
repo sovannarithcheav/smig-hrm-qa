@@ -23,7 +23,7 @@ Feature: PAY-RUN-003 Payroll Run - Get By ID
 
   @smoke
   Scenario: Get batch details - returns 200 with employee details
-    * def res = karate.call('classpath:payment/payroll-runs/helper/create-run.feature', { period: '2099-03' })
+    * def res = karate.call('classpath:payment/payroll-runs/helper/create-run.feature', { period: '2099-05' })
     * def runId = res.runId
     # Fetch run to get a batch id
     Given path '/api/v1/payment/payroll-runs/' + runId

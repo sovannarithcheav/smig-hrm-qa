@@ -12,6 +12,7 @@ repositories {
 dependencies {
     testImplementation("com.intuit.karate:karate-junit5:1.4.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.postgresql:postgresql:42.7.3")
 }
 
 kotlin {
