@@ -11,7 +11,7 @@ class PayrollRunRunner {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            ServiceStarter.ensureRunning("payment", "change-management")
+            ServiceStarter.ensureRunning("payment", "change-management", "notification")
             cleanTestPayrollData()
         }
 
