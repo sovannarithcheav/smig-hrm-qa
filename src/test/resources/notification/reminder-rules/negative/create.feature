@@ -26,7 +26,7 @@ Feature: NT-RR-N-001 Create Reminder Rule - validation failures
     And request { name: 'bad', dateKind: 'X', offsetDays: [1], eventId: 999999, channelIds: [2] }
     When method POST
     Then status 400
-    And match response.error contains 'not found'
+    And match response.error == '#regex event_id \\d+ not found'
 
   Scenario: Empty channel_ids returns 400
     Given path '/api/v1/notification/reminder-rules'

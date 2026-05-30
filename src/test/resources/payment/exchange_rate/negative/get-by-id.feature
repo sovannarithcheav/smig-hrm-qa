@@ -17,5 +17,5 @@ Feature: PAY-003 Exchange Rate - Get by ID Negative
     Given path '/api/v1/payment/exchange-rates/999999'
     When method GET
     Then status 404
-    And match response.error != null
+    And match response.error == '#regex ExchangeRate \\d+ not found'
     And match response.data == null

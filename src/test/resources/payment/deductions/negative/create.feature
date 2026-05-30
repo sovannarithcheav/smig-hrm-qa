@@ -34,7 +34,7 @@ Feature: PAY-DED-N-001 Create Deduction - validation failures
     And request { "employeeId": 999999, "deductionType": "DAMAGE", "amount": 50, "effectiveDate": "2026-06-01" }
     When method POST
     Then status 400
-    And match response.error contains 'not found'
+    And match response.error == '#regex Employee \\d+ not found'
 
   Scenario: endDate before effectiveDate returns 400
     Given path '/api/v1/payment/deductions'
