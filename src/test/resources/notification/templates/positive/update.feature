@@ -24,6 +24,7 @@ Feature: NT-003 Update Notification Template
 
   @smoke
   Scenario: Update body only — change is reflected in template after approval
+    # Step 1: Submit update
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request { "body": "Updated body for testing.", "statusId": 1 }
@@ -33,6 +34,7 @@ Feature: NT-003 Update Notification Template
     And match response.data.requestChangeId == '#number'
     * def requestChangeId = response.data.requestChangeId
 
+    # Step 2: Approve via CS
     Given url changeManagementUrl
     And path '/api/v1/request-change/' + requestChangeId + '/approve'
     And header X-User-Id = userId
@@ -41,11 +43,35 @@ Feature: NT-003 Update Notification Template
     Then status 200
     And match response.error == null
 
+    # Step 3: Verify body changed
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     When method GET
     Then status 200
     And match response.data.body == 'Updated body for testing.'
+
+    # Step 4: Restore original body
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
+    When method PUT
+    Then status 202
+    * def restoreChangeId = response.data.requestChangeId
+
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + restoreChangeId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+
+    # Step 5: Confirm restoration
+    Given url notificationUrl
+    And path '/api/v1/notification/templates/1'
+    When method GET
+    Then status 200
+    And match response.data.body == original.body
 
   @smoke
   Scenario: Update with subject — change is reflected in template after approval
