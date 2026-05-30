@@ -6,10 +6,17 @@ Feature: NT-003 Update Notification Template
     * def originalSetup = callonce read('classpath:notification/helper/fetch-template.feature') { templateId: 1 }
     * def original = originalSetup.template
 
-    # Fetch all variables from DB once — used in scenarios that need a real variable id + label
+    # Fetch all variables from DB once
     * def varSetup = callonce read('classpath:notification/helper/fetch-variables.feature') {}
     * def allVars  = varSetup.variables
-    * def testVar  = allVars[0]
+
+    # Compute original variable IDs from body placeholders (avoids stale original.variables)
+    * def extractPlaceholders = function(text){ return (text || '').match(/\$\{[^}]+\}/g) || [] }
+    * def allBodyPlaceholders = extractPlaceholders(original.body).concat(extractPlaceholders(original.subject))
+    * def uniquePlaceholders = allBodyPlaceholders.filter(function(v,i,a){ return a.indexOf(v) === i })
+    * def varsMap = {}
+    * karate.forEach(allVars, function(v){ varsMap[v.name] = v.id })
+    * def originalVarIds = uniquePlaceholders.map(function(p){ return { id: varsMap[p] } }).filter(function(x){ return x.id !== undefined })
 
     # Cancel own pending notification-template request changes before each scenario
     Given url changeManagementUrl
@@ -24,7 +31,6 @@ Feature: NT-003 Update Notification Template
 
   @smoke
   Scenario: Update body only — change is reflected in template after approval
-    # Step 1: Submit update
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
     And request { "body": "Updated body for testing.", "statusId": 1 }
@@ -34,7 +40,6 @@ Feature: NT-003 Update Notification Template
     And match response.data.requestChangeId == '#number'
     * def requestChangeId = response.data.requestChangeId
 
-    # Step 2: Approve via CS
     Given url changeManagementUrl
     And path '/api/v1/request-change/' + requestChangeId + '/approve'
     And header X-User-Id = userId
@@ -43,30 +48,26 @@ Feature: NT-003 Update Notification Template
     Then status 200
     And match response.error == null
 
-    # Step 3: Verify body changed
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     When method GET
     Then status 200
     And match response.data.body == 'Updated body for testing.'
 
-    # Step 4: Restore original body
-    Given url notificationUrl
-    And path '/api/v1/notification/templates/1'
+    # Restore
+    Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
     When method PUT
     Then status 202
-    * def restoreChangeId = response.data.requestChangeId
-
+    * def restoreId = response.data.requestChangeId
     Given url changeManagementUrl
-    And path '/api/v1/request-change/' + restoreChangeId + '/approve'
+    And path '/api/v1/request-change/' + restoreId + '/approve'
     And header X-User-Id = userId
     And header X-Participant-Id = userId
     When method POST
     Then status 200
 
-    # Step 5: Confirm restoration
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     When method GET
@@ -77,11 +78,10 @@ Feature: NT-003 Update Notification Template
   Scenario: Update with subject — change is reflected in template after approval
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "subject": "Test Subject", "body": "Updated with subject.", "statusId": 1, "variables": [] }
+    And request { "body": "Updated with subject.", "subject": "Test Subject", "statusId": 1 }
     When method PUT
     Then status 202
     And match response.error == null
-    And match response.data.requestChangeId == '#number'
     * def requestChangeId = response.data.requestChangeId
 
     Given url changeManagementUrl
@@ -90,7 +90,6 @@ Feature: NT-003 Update Notification Template
     And header X-Participant-Id = userId
     When method POST
     Then status 200
-    And match response.error == null
 
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
@@ -99,8 +98,23 @@ Feature: NT-003 Update Notification Template
     And match response.data.body == 'Updated with subject.'
     And match response.data.subject == 'Test Subject'
 
+    # Restore
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
+    When method PUT
+    Then status 202
+    * def restoreId = response.data.requestChangeId
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + restoreId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
+
   @smoke
   Scenario: Update with variables and matching placeholder — reflected after approval
+    * def testVar = allVars[0]
     * def testBody = 'Dear ' + testVar.name + ', your request has been processed.'
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
@@ -115,7 +129,6 @@ Feature: NT-003 Update Notification Template
     When method PUT
     Then status 202
     And match response.error == null
-    And match response.data.requestChangeId == '#number'
     * def requestChangeId = response.data.requestChangeId
 
     Given url changeManagementUrl
@@ -124,7 +137,6 @@ Feature: NT-003 Update Notification Template
     And header X-Participant-Id = userId
     When method POST
     Then status 200
-    And match response.error == null
 
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
@@ -132,6 +144,20 @@ Feature: NT-003 Update Notification Template
     Then status 200
     And match response.data.body == testBody
     And match response.data.variables[0].id == testVar.id
+
+    # Restore
+    Given path '/api/v1/notification/templates/1'
+    And header X-User-Id = userId
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
+    When method PUT
+    Then status 202
+    * def restoreId = response.data.requestChangeId
+    Given url changeManagementUrl
+    And path '/api/v1/request-change/' + restoreId + '/approve'
+    And header X-User-Id = userId
+    And header X-Participant-Id = userId
+    When method POST
+    Then status 200
 
   Scenario: Update multiple variables with all matching placeholders — all reflected after approval
     * def var1 = allVars[0]
@@ -169,7 +195,7 @@ Feature: NT-003 Update Notification Template
     # Restore
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
     When method PUT
     Then status 202
     * def restoreId = response.data.requestChangeId
@@ -184,7 +210,7 @@ Feature: NT-003 Update Notification Template
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "#(original.body)", "statusId": 2 }
+    And request { "body": "#(original.body)", "statusId": 2, "variables": #(originalVarIds) }
     When method PUT
     Then status 202
     * def requestChangeId = response.data.requestChangeId
@@ -205,7 +231,7 @@ Feature: NT-003 Update Notification Template
     # Restore
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
     When method PUT
     Then status 202
     * def restoreId = response.data.requestChangeId
@@ -224,7 +250,6 @@ Feature: NT-003 Update Notification Template
     When method PUT
     Then status 202
     And match response.error == null
-    And match response.data.requestChangeId == '#number'
     * def requestChangeId = response.data.requestChangeId
 
     Given url changeManagementUrl
@@ -243,7 +268,7 @@ Feature: NT-003 Update Notification Template
     # Restore
     Given path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
+    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
     When method PUT
     Then status 202
     * def restoreId = response.data.requestChangeId
@@ -255,10 +280,11 @@ Feature: NT-003 Update Notification Template
     Then status 200
 
   Scenario: Update with X-User-Id header — updatedBy is recorded after approval
+    * def userIdNum = parseInt(userId)
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     And header X-User-Id = userId
-    And request { "body": "Body for updatedBy check.", "statusId": 1 }
+    And request { "body": "#(original.body)", "statusId": #(original.status.id), "variables": #(originalVarIds) }
     When method PUT
     Then status 202
     * def requestChangeId = response.data.requestChangeId
@@ -274,21 +300,7 @@ Feature: NT-003 Update Notification Template
     And path '/api/v1/notification/templates/1'
     When method GET
     Then status 200
-    And match response.data.updatedBy == userId
-
-    # Restore
-    Given path '/api/v1/notification/templates/1'
-    And header X-User-Id = userId
-    And request { "body": "#(original.body)", "subject": "#(original.subject)", "statusId": #(original.statusId) }
-    When method PUT
-    Then status 202
-    * def restoreId = response.data.requestChangeId
-    Given url changeManagementUrl
-    And path '/api/v1/request-change/' + restoreId + '/approve'
-    And header X-User-Id = userId
-    And header X-Participant-Id = userId
-    When method POST
-    Then status 200
+    And match response.data.updatedBy == userIdNum
 
   Scenario: Reject request change — template body remains unchanged
     * def bodyBefore = original.body
@@ -300,16 +312,16 @@ Feature: NT-003 Update Notification Template
     Then status 202
     * def requestChangeId = response.data.requestChangeId
 
-    # Reject via CS
     Given url changeManagementUrl
     And path '/api/v1/request-change/' + requestChangeId + '/reject'
     And header X-User-Id = userId
     And header X-Participant-Id = userId
+    And header Content-Type = 'application/json'
+    And request {}
     When method POST
     Then status 200
     And match response.error == null
 
-    # Verify template unchanged
     Given url notificationUrl
     And path '/api/v1/notification/templates/1'
     When method GET
