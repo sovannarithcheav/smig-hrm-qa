@@ -53,12 +53,17 @@ object ServiceStarter {
         error("[QA] $name failed to start within 90s")
     }
 
-    private fun isHealthy(url: String): Boolean = try {
-        val conn = URL(url).openConnection() as HttpURLConnection
-        conn.connectTimeout = 2_000
-        conn.readTimeout = 2_000
-        conn.responseCode == 200
-    } catch (e: Exception) {
-        false
+    private fun isHealthy(url: String): Boolean {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = URL(url).openConnection() as HttpURLConnection
+            conn.connectTimeout = 2_000
+            conn.readTimeout = 2_000
+            conn.responseCode == 200
+        } catch (e: Exception) {
+            false
+        } finally {
+            conn?.disconnect()
+        }
     }
 }
