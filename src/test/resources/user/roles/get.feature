@@ -12,6 +12,8 @@ Feature: US Roles - detail
     Then status 200
     And match response.data.name == 'ADMIN'
     And match response.data.roleType.roleType == 'ADMIN'
+    And match response.data.roleType.name == 'Administrator'
+    And match response.data.roleType.roleId == 1
     And match response.data.access == '#[40]'
     And match response.data.access[*].permission contains ['USER_view', 'USER_create', 'ROLE_view']
 

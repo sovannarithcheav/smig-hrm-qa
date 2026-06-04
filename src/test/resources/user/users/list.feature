@@ -12,7 +12,8 @@ Feature: US Users - list
     Then status 200
     And match response.data.pagination.total == 4
     And match response.data.content[*].username contains ['admin', 'hr_user', 'authorizer', 'authorizer2']
-    And match response.data.content[0].primaryRole.roleType == '#string'
+    And match response.data.content[0].primaryRole.roleType == 'ADMIN'
+    And match response.data.content[0].primaryRole.roleId == 1
 
   Scenario: q filters by username/fullName
     Given path '/api/v1/user/users'

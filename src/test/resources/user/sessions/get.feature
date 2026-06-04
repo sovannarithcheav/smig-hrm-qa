@@ -19,6 +19,8 @@ Feature: US Sessions - detail
     And match response.data.id == sid
     And match response.data.userId == 1
     And match response.data.status == 'ACTIVE'
+    And match response.data.username == 'admin'
+    And match response.data.roleType == 'ADMIN'
 
   Scenario: 404 unknown id
     Given path '/api/v1/user/sessions/999999'

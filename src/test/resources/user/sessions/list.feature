@@ -19,4 +19,5 @@ Feature: US Sessions - list
     And param userId = 1
     When method GET
     Then status 200
+    And assert response.data.content.length >= 1
     And match each response.data.content[*].userId == 1
