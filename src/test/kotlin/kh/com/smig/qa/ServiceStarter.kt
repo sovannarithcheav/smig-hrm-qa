@@ -12,6 +12,7 @@ object ServiceStarter {
         "change-management" to ServiceDef(8084, "smig-hrm-change-management"),
         "payment"           to ServiceDef(8085, "smig-hrm-payment-service"),
         "notification"      to ServiceDef(8088, "smig-hrm-notification"),
+        "user"              to ServiceDef(8081, "smig-hrm-user-service"),
     )
 
     /** Start all listed services in parallel, waiting for every one to be UP. */
