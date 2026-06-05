@@ -6,11 +6,12 @@ Feature: US Roles - list
     * url userUrl
     * header Authorization = 'Bearer ' + login.accessToken
 
-  Scenario: list returns 3 roles
+  # total is >= 3, not == 3: role write-flow tests create extra roles in the shared dev DB.
+  Scenario: list returns at least the 3 seed roles
     Given path '/api/v1/user/roles'
     When method GET
     Then status 200
-    And match response.data.pagination.total == 3
+    And match response.data.pagination.total == '#? _ >= 3'
     And match response.data.content[*].name contains ['ADMIN', 'HR Officer', 'Authorizer']
 
   Scenario: q filters by name
