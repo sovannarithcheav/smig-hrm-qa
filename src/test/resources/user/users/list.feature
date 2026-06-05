@@ -6,11 +6,12 @@ Feature: US Users - list
     * url userUrl
     * header Authorization = 'Bearer ' + login.accessToken
 
-  Scenario: list returns 4 users with embedded primaryRole
+  Scenario: list returns the seed users with embedded primaryRole
     Given path '/api/v1/user/users'
     When method GET
     Then status 200
-    And match response.data.pagination.total == 4
+    # >= 4: the write-flow suite may have created additional users in the shared dev DB
+    And match response.data.pagination.total == '#? _ >= 4'
     And match response.data.content[*].username contains ['admin', 'hr_user', 'authorizer', 'authorizer2']
     And match response.data.content[0].primaryRole.roleType == 'ADMIN'
     And match response.data.content[0].primaryRole.roleId == 1

@@ -12,6 +12,7 @@ class UserReadRunner {
         fun setup() = ServiceStarter.ensureRunning("user")
     }
 
+    // Excludes @write features — those need change-management too and live in UserWriteRunner.
     @Karate.Test
-    fun run(): Karate = Karate.run("classpath:user").relativeTo(javaClass)
+    fun run(): Karate = Karate.run("classpath:user").tags("~@write").relativeTo(javaClass)
 }
